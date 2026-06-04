@@ -1,13 +1,10 @@
-const {Pool} = require('pg');
+const { Pool } = require('pg')
 
 const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    database: 'novamind',
-    user: 'postgres',
-    password: '1234'
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false
 })
-
-
 
 module.exports = pool
