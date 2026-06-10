@@ -7,6 +7,7 @@ const groq = new Groq({
     apiKey: process.env.GROQ_API_KEY
 })
 
+// SUGGEST → POST /ai/suggest
 router.post('/suggest', protect, async (req, res) => {
     try {
         const { goal } = req.body
@@ -40,6 +41,45 @@ Example: ["task1", "task2", "task3", "task4"]`
         res.status(200).json({
             success:     true,
             suggestions: tasks
+        })
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+})
+
+// CHAT → POST /ai/chat
+router.post('/chat', protect, async (req, res) => {
+    try {
+        const { message } = req.body
+
+        if (!message) {
+            return res.status(400).json({
+                success: false,
+                message: 'Message is required'
+            })
+        }
+
+        const completion = await groq.chat.completions.create({
+            messages: [{
+                role:    'system',
+                content: 'You are NovaMind, a helpful AI assistant for learning and productivity. Be concise and helpful.'
+            },
+            {
+                role:    'user',
+                content: message
+            }],
+            model: 'llama-3.3-70b-versatile',
+        })
+
+        const reply = completion.choices[0].message.content
+
+        res.status(200).json({
+            success: true,
+            reply:   reply
         })
 
     } catch (error) {
